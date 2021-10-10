@@ -18,7 +18,7 @@ CUR_ENV = "PRD"
 
 @app.route('/') #endpoint
 def index():
-    return 'Web App with Python Caprice!' + USER_PASSWORDS['cjardin']
+    return render_to_response('static/homework1.html')
 
 @app.route('/buy') #endpoint
 def buy():
