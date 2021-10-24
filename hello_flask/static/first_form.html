@@ -6,42 +6,70 @@
     <body>
 
 	<script>
+			
+		function testA(){
+
+		alert($('#username').val());
+		alert($('#password').val());
+		return true;
+		}
+
 		function check_form(){
 
-			alert($('#fname').val());
-			alert($('#lname').val());
+		//	$('#login').hide();
+		//	$('#books').show();
 
-			$('#login').hide();
-			$('#books').show();
 			
-			$('#cars').append('<option value="volvo">Thank you Taco</option>')
+			var usrCheck = check_user($('#username').val());
+			var passCheck = check_pass($('#password').val());
 
-
-			return false;
-
-			if($('#fname').val().length == 0){
-				return false;
-			}else{
+			if(usrCheck && passCheck){
+				alert('pass');
 				return true;
+			}else{
+				alert('failed');
+				return false;
 			}
 		}
+
+
+		function check_user(x){
+			if( x.length > 0)
+			{
+
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		function check_pass(x){
+			if( x.length > 0)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
 
 	</script>
             <div id="login">
 	    	<form action="/backp" method="post">
-  			<label for="fname">First name:</label><br>
-  				<input type="text" id="fname" name="fname" value="John"><br>
-  			<label for="lname">Last name:</label><br>
-  				<input type="password" id="lname" name="lname" value="Doe"><br><br>
+  			<label for="username">Username:</label><br>
+  				<input type="text" id="username" name="username" value="John"><br>
+  			<label for="password">Password:</label><br>
+  				<input type="password" id="password" name="password" value=""><br><br>
   			<input type="submit" value="Signup" onclick="return check_form();">
 		</form>
 	    </div>
 
 	    <div id="books" style="display:none">
 		    <h1>Buy me</h1>
-		    <select name="cars" id="cars">
-
-  		    </select>
 	    </div>
 
     </body>

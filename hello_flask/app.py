@@ -30,7 +30,7 @@ with open("secret", "r") as f:
 
 @app.route('/') #endpoint
 def index():
-    return render_to_response('static/homework1.html')
+    return render_template('homework1.html')
 
 @app.route('/buy') #endpoint
 def buy():
@@ -47,10 +47,10 @@ def back():
 @app.route('/backp',  methods=['POST']) #endpoint
 def backp():
     print(request.form)
-    salted = bcrypt.hashpw( bytes(request.form['fname'],  'utf-8' ) , bcrypt.gensalt(10))
+    salted = bcrypt.hashpw( bytes(request.form['password'],  'utf-8' ) , bcrypt.gensalt(12))
     print(salted)
 
-    print(  bcrypt.checkpw(  bytes(request.form['fname'],  'utf-8' )  , salted ))
+    print(  bcrypt.checkpw(  bytes(request.form['password'],  'utf-8' )  , salted ))
 
     return render_template('backatu.html',input_from_browser= str(request.form) )
 
@@ -59,7 +59,16 @@ def auth():
         print(request.form)
         return json_response(data=request.form)
 
+@app.route('/store', methods['POST']) #endpoint
+def store():
+    cur = global_db_con.cursor()
+    cur.execute("select * from books;")
+    
 
+@app.route('/signup', methods['POST']) #endpoint
+    def signup():
+
+            return render_template('backatu.html',input_from_browser= str(request.form) )
 
 #Assigment 2
 @app.route('/ss1') #endpoint
