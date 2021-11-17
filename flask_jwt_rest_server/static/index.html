@@ -8,8 +8,9 @@
     <body>
 
 	<script>
-		function send_form(){
-			$.post("/open_api/login", { "firstname":$('#fname').val(), "password":$('#password').val()},
+		function send_login(){
+			$.post("/open_api/login", { "username":$('#loginUsername').val(),
+				"password":$('#loginPassword').val()},
                        		function(data, textStatus) {
 					//this gets called when browser receives response from server
 					console.log(data.token);
@@ -25,22 +26,85 @@
 			return false;
 		}
 
+		function send_signup(){
+                        $.post("/open_api/signup", {"username":$('#signupUsername').val(),
+				"password":$('#signupPassword').val()},
+                                function(data, textStatus) {
+                                        //this gets called when browser receives response from server
+                                        console.log(data.token);
+                                        //Set global JWT
+                                        jwt = data.token;
+                                        //make secure call with the jwt
+                                        get_books();
+                                }, "json").fail( function(response) {
+                                        //this gets called if the server throws an error
+                                        console.log("error");
+                                        console.log(response);
+                                });
+                        return false;
+                }	
+
+
 		function get_books(){
 			 //make secure call with the jwt
-                         secure_get_with_token("/secure_api/get_books", function(data){console.log("got books"); console.log(data)},
-                                                function(err){ console.log(err) });
+                         secure_get_with_token("/secure_api/get_books", function(data){
+				 console.log("got books");
+				 console.log(data)},
+					 
+					
+                        function(err){ console.log(err) });
+			}
+
+
+
+		function showBooks(){	
+			$('#login').hide();
+			$('#signup').hide();
+                 	$('#booksDiv').show();
+                 	$('#purchaseButton').show();
+		}
+		
+		function purchaseBook(){	
+			var selectedBook = $('#bookSelection').find(":selected").text();
+			if(typeof jwt !== 'undefined')
+			{
+				receipt = $.get("/secure_api/purchase", {jwt: loginJSON,
+				book: selectedBook});
+			}	
+			else{
+				alert("User could not be authenticated, please log back in or sign up.");
+			}	
 		}
 
 	</script>
             <div id="login">
 	    	<form >
-  			<label for="fname">First name:</label><br>
-  				<input type="text" id="fname" name="fname" value="John"><br>
-  			<label for="password">Password:</label><br>
-  				<input type="password" id="password" name="password" value="12212"><br><br>
-  			<input type="submit" value="Signup" onclick="return send_form();">
+  			<label for="loginUsername">Username:</label><br>
+  				<input type="text" id="loginUsername" name="loginUsername" value="John"><br>
+  			<label for="loginPassword">Password:</label><br>
+  				<input type="password" id="loginPassword" name="loginPassword" value="12212"><br><br>
+  			<input type="submit" value="Login" onclick="return send_login();">
 		</form>
 	    </div>
+
+	    <div id="signup">
+                <form >
+                        <label for="signupUsername">Username:</label><br>
+                                <input type="text" id="signupUsername" name="signupUsername" value="John"><br>
+                        <label for="signupPassword">Password:</label><br>
+                                <input type="password" id="signupPassword" name="signupPassword" value="12212"><br><br>
+                        <input type="submit" value="Signup" onclick="return send_signup();">
+                </form>
+            </div>
+
+	   <div id="booksDiv" display: hidden>
+		<select name="bookSelection" id="bookSelection"></select>
+	</div>
+
+	<div id="purchaseButton" display: hidden>
+		<input type="submit" value="Purchase book" onclick="return purchaseBook();">
+	</div>
+
     </body>
 </html>
 
