@@ -34,4 +34,8 @@ def handle_request():
         return json_response(status_=401, message = 'Passwords do not match', authenticated =  False )
 
 
+<<<<<<< HEAD
+=======
+    return json_response( token = create_token(user) , authenticated = True)
+>>>>>>> a334494f94b6cfc48889b1533a492fb50a80341f
 
