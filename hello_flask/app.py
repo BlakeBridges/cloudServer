@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,jsonify
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 import jwt
 
@@ -24,13 +24,21 @@ JWT_SECRET = None
 
 global_db_con = get_db()
 
+#def token_validation(token):
+
+
+def JWT_Token(user):
+    token = jwt.encode({'username': user,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)},
+        JWT_SECRET, algorithm="HS256")
+    return token
 
 with open("secret", "r") as f:
     JWT_SECRET = f.read()
 
 @app.route('/') #endpoint
 def index():
-    return 'Web App with Python Caprice!' + USER_PASSWORDS['cjardin']
+    return render_template('hello.html',img_url=IMGS_URL[CUR_ENV])
 
 @app.route('/buy') #endpoint
 def buy():
@@ -47,24 +55,100 @@ def back():
 @app.route('/backp',  methods=['POST']) #endpoint
 def backp():
     print(request.form)
-    salted = bcrypt.hashpw( bytes(request.form['fname'],  'utf-8' ) , bcrypt.gensalt(10))
+    salted = bcrypt.hashpw( bytes(request.form['password'],  'utf-8' ) , bcrypt.gensalt(12))
     print(salted)
 
-    print(  bcrypt.checkpw(  bytes(request.form['fname'],  'utf-8' )  , salted ))
+    print(  bcrypt.checkpw(  bytes(request.form['password'],  'utf-8' )  , salted ))
 
     return render_template('backatu.html',input_from_browser= str(request.form) )
 
 @app.route('/auth',  methods=['POST']) #endpoint
 def auth():
-        print(request.form)
-        return json_response(data=request.form)
+    print(request.form)
+    return json_response(data=request.form)
+
+@app.route('/login', methods=['POST'])
+def login():
+    user_ID = request.form['username']
+    password = request.form['password']
+    cur = global_db_con.cursor()
+    cur.execute(f"select passhash from users where userID = '{user_ID}';")
+    db_pass = cur.fetchone()[0]
+    if(db_pass == None):
+        print("username not found")
+        status = 403
+        return jsonify(status)
+    else:
+        db_pass = bytes(db_pass, 'utf-8')
+        checkPass = bcrypt.checkpw(bytes(password, 'utf-8'), db_pass)
+        if(checkPass):
+            token = JWT_Token(user_ID)
+            return jsonify(token)
+        else:
+            print("pass doesn't match")
+            status = 403
+            return jsonify(status)
 
 
 
-#Assigment 2
-@app.route('/ss1') #endpoint
-def ss1():
-    return render_template('server_time.html', server_time= str(datetime.datetime.now()) )
+@app.route('/store', methods=['GET']) #endpoint
+def store():
+    cur = global_db_con.cursor()
+    cur.execute("select title, author from books;")
+    books = cur.fetchall()
+    if books == None:
+       return "Book table returned nothing"
+    else:
+     bookList = []
+     for book in books:
+        bookList.append(book)
+    return json_response(bookList = books)
+    
+
+@app.route('/signup', methods=['POST']) #endpoit
+def signup():
+    user_name = request.form['username']
+    passwork = request.form['password']
+    cur = global_db_con.cursor()
+    cur.execute(f"select * from users where userID = '{user_name}';")
+    nameCheck = cur.fetchone()
+    if nameCheck == None:
+        salted = bcrypt.hashpw( bytes(request.form['password'],  'utf-8' ) , bcrypt.gensalt(12))
+        decryptSalt = salted.decode('utf-8')
+        print(decryptSalt)
+        cur.execute(f"insert into users(userID, passHash) values('{user_name}', '{decryptSalt}');")
+        global_db_con.commit()
+        token = JWT_Token(user_name)
+        return jsonify(token)
+    else:
+        print("username exists")
+        return make_response(
+            'Username already exists',
+            401,
+            {'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'})
+
+
+@app.route('/purchase', methods=['POST'])
+def purchase():
+    passedJWT = request.form['jwt']
+    book = request.form['book']
+    decodedJWT = jwt.decode(passedJWT, JWT_SECRET, algorithms=["HS256"])
+    print(decodedJWT)
+    user_name = decodedJWT['username']
+    cur = global_db_con.cursor()
+    cur.execute(f"select * from users where userID = '{user_name}';")
+    db_user = cur.fetchone()[0]
+    if(db_user == None):
+        print("username not found")
+        status = 401
+        return jsonify(status)
+    else:
+        cur.execute(f"insert into purchases(userID, bookTitle) values('{user_name}', '{book}');")
+        global_db_con.commit()
+        status = 200
+        return jsonify(status)
+
+
 
 @app.route('/getTime') #endpoint
 def get_time():
