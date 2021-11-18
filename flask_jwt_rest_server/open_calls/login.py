@@ -29,13 +29,7 @@ def handle_request():
         db_pass = bytes(db_pass, 'utf-8')
         checkPass = bcrypt.checkpw(bytes(password_from_user_form, 'utf-8'), db_pass)
         if(checkPass):
-           return json_response(token = create_token(user) , authenticated = False)
+           return json_response(token = create_token(user) , authenticated = True)
         
         return json_response(status_=401, message = 'Passwords do not match', authenticated =  False )
-
-
-<<<<<<< HEAD
-=======
-    return json_response( token = create_token(user) , authenticated = True)
->>>>>>> a334494f94b6cfc48889b1533a492fb50a80341f
 

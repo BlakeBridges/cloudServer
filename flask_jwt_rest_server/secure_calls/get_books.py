@@ -8,6 +8,7 @@ from tools.logging import logger
 
 def handle_request():
     logger.debug("Get Books Handle Request")
+    global_db_con = get_db()
     cur = global_db_con.cursor()
     cur.execute("select title, author from books;")
     books = cur.fetchall()

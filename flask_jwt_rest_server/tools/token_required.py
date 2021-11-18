@@ -13,7 +13,7 @@ def token_required(f):
     def _verify(*args, **kwargs):
         secrets = get_secrets()
         auth_headers = request.headers.get('Authorization', '').split(':')
-
+    
         invalid_msg = {
             'message': 'Invalid token. Registeration and / or authentication required',
             'authenticated': False

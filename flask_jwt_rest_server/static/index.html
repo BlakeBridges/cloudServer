@@ -48,10 +48,16 @@
 		function get_books(){
 			 //make secure call with the jwt
                          secure_get_with_token("/secure_api/get_books", function(data){
-				 console.log("got books");
-				 console.log(data)},
-					 
+				 console.log(data)
+				for( i = 0; i < data.books.length; i++)
+				{
+					book = data.books[i][0];
+					author = data.books[i][1];
+					$('#bookSelection').append(`<option value="book ${i}">${book}</option>`);
+				}
 					
+				 showBooks();
+			 },
                         function(err){ console.log(err) });
 			}
 
@@ -64,17 +70,17 @@
                  	$('#purchaseButton').show();
 		}
 		
-		function purchaseBook(){	
-			var selectedBook = $('#bookSelection').find(":selected").text();
-			if(typeof jwt !== 'undefined')
-			{
-				receipt = $.get("/secure_api/purchase", {jwt: loginJSON,
-				book: selectedBook});
-			}	
-			else{
-				alert("User could not be authenticated, please log back in or sign up.");
-			}	
-		}
+		function purchaseBook() {
+			book = $('#bookSelection').find(":selected").text()
+			console.log(book)
+           		secure_post_with_token("/secure_api/purchase",
+				book,
+				function(data){
+					 console.log("Sent Purchase");
+			   		 alert("Book Purchased")
+				},
+                                function(err){ console.log(err) });
+        	}
 
 	</script>
             <div id="login">
@@ -90,9 +96,9 @@
 	    <div id="signup">
                 <form >
                         <label for="signupUsername">Username:</label><br>
-                                <input type="text" id="signupUsername" name="signupUsername" value="John"><br>
+                                <input type="text" id="signupUsername" name="signupUsername" value=""><br>
                         <label for="signupPassword">Password:</label><br>
-                                <input type="password" id="signupPassword" name="signupPassword" value="12212"><br><br>
+                                <input type="password" id="signupPassword" name="signupPassword" value=""><br><br>
                         <input type="submit" value="Signup" onclick="return send_signup();">
                 </form>
             </div>
