@@ -12,8 +12,6 @@ def handle_request():
     #use data here to auth the user
     username_from_user_form = request.form['username']
     password_from_user_form = request.form['password']
-    global_db_con = get_db()
-    cur = global_db_con.cursor()
     user = {
             "sub" : username_from_user_form #sub is used by pyJwt as the owner of the token
             }
@@ -21,8 +19,8 @@ def handle_request():
         return json_response(status_=401, message = 'No username was input', authenticated =  False )
     query = sql.SQL( "select passhash from users where userID = {user_name};").format(
             user_name=sql.Literal(username_from_user_form))
-    cur.execute(query)
-    db_pass = cur.fetchone()[0]
+    g.cur.execute(query)
+    db_pass = g.cur.fetchone()[0]
     if(db_pass == None):
         return json_response(status_=401, message = 'User not found in system', authenticated =  False )
     else:

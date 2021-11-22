@@ -32,12 +32,11 @@ def handle_request():
         decodedJWT = jwt.decode(token, secrets['JWT'], algorithms=["HS256"])
         logger.debug(decodedJWT)
         user_name = decodedJWT['sub']
-        global_db_con = get_db()
-        cur = global_db_con.cursor()
+     
         query = sql.SQL("select * from users where userID = {user_name};").format(
             user_name=sql.Literal(user_name))
-        cur.execute(query)
-        db_user = cur.fetchone()[0]
+        g.cur.execute(query)
+        db_user = g.cur.fetchone()[0]
         if(db_user == None):
             logger.debug("user not found")
             return json_response(status_=500, message = 'Could not find user in database', authenticated =  False )
@@ -50,8 +49,8 @@ def handle_request():
                 newPurchase=sql.SQL(', ').join([
                     sql.Literal(user_name),
                     sql.Literal(book)]))
-            cur.execute(query)
-            global_db_con.commit()
+            g.cur.execute(query)
+            g.db.commit()
             return json_response(status_=200, message = 'Purchase successful', authenticated = True )
     except jwt.ExpiredSignatureError:
              return json_response(status_=401 ,message=expired_msg) # 401 is Unauthorized HTTP status code

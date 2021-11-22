@@ -11,15 +11,15 @@ def handle_request():
     #use data here to insert user into DB and auth the user
     username_from_user_form = request.form['username']
     password_from_user_form = request.form['password']
-    global_db_con = get_db() 
+
     
     if not username_from_user_form:
         return json_response(status_=401, message = 'No Username input', authenticated =  False )
-    cur = global_db_con.cursor()
+    
     query = sql.SQL( "select * from users where userID = {user_name};").format(
             user_name=sql.Literal(username_from_user_form))
-    cur.execute(query)
-    nameCheck = cur.fetchone()
+    g.cur.execute(query)
+    nameCheck = g.cur.fetchone()
     if nameCheck == None:
         salted = bcrypt.hashpw( bytes(request.form['password'],  'utf-8' ) , bcrypt.gensalt(12))
         decryptSalt = salted.decode('utf-8')
@@ -28,8 +28,8 @@ def handle_request():
                 newUser=sql.SQL(', ').join([
                     sql.Literal(username_from_user_form),
                     sql.Literal(decryptSalt)]))
-        cur.execute(query)
-        global_db_con.commit()
+        g.cur.execute(query)
+        g.db.commit()
         user = {
                 "sub" : username_from_user_form #sub is used by pyJwt as the owner of the token
                 }
