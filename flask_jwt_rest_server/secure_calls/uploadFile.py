@@ -11,7 +11,7 @@ from datetime import date
 import subprocess
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'mp4', 'gif', 'bmp'])
 
 
 def CreateNewDir(folder):

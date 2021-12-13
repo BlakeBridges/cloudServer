@@ -30,6 +30,8 @@
 
     <div id='file-list-display'></div>
     </div>
+    <div id="loading" display: hidden ><img src="/static/images/loading.gif"/></div>
+
 
 
     <script>
@@ -40,9 +42,11 @@
             var fileListDisplay = document.getElementById('file-list-display');
             var fileList = [];
             var renderFileList, sendFile;
-
+		fileSuccessfullyUploaded = 0;
             fileCatcher.addEventListener('submit', function (evnt) {
                 evnt.preventDefault();
+		    numberOfFiles = fileList.length;
+		    uploading();
                 fileList.forEach(function (file) {
                     sendFile(file);
                 });
@@ -62,6 +66,7 @@
                     var fileDisplayEl = document.createElement('p');
                     fileDisplayEl.innerHTML = (index + 1) + ': ' + file.name;
                     fileListDisplay.appendChild(fileDisplayEl);
+			
                 });
                 };
 		
@@ -73,10 +78,13 @@
                         formData,
                         function (data) {
                             console.log(data);
-           
+           			fileSuccessfullyUploaded++;
+				if(fileSuccessfullyUploaded == numberOfFiles){
+					doneUploading();
+				}
                         },
                         function (err) { console.log(err)
-			Alert("Could not save images, try again.")
+			alert("Could not save images, try again.")
 			})
                 };
             })();
@@ -101,15 +109,25 @@
                     });
                 return false;
             }
+		
+		function uploading()
+		{
+		$('#loading').show();
+		}
 
+		function doneUploading()
+		{
+		$('#loading').hide();
+		}
+		
             function showUpload() {
                 $('#login').hide();
                 $('#fileDiv').show();
+		    document.body.style.backgroundImage = "url('./images/background.jpg')";
+
             }
 
     </script>
-
-
 </body>
 </html>
 
