@@ -42,4 +42,46 @@ function secure_post_with_token(endpoint, data_to_send, on_success_callback, on_
         });
 }
 
+function secure_file_upload(endpoint, data_to_send, on_success_callback, on_fail_callback)
+{
+	xhr = new XMLHttpRequest();
+		
+	xhr.upload.addEventListener('progress', function (e) {
+        var file1Size = data_to_send;
+
+        if (e.loaded <= file1Size) {
+            var percent = Math.round(e.loaded / file1Size * 100);
+            $('#progress-bar-file1').width(percent + '%').html(percent + '%');
+        } 
+
+        if(e.loaded == e.total){
+            $('#progress-bar-file1').width(100 + '%').html(100 + '%');
+        }
+    	});   
+
+        function setHeader(xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer:'+jwt);
+	
+        }
+
+	$.ajax({
+		//actual post
+       		 url: endpoint,
+        	type: "POST",
+        	contentType:false,
+        	processData: false,
+        	cache: false,
+        	data: data_to_send,
+        	success: on_success_callback,
+		error: on_fail_callback,
+        	beforeSend: setHeader 
+
+ });
+}
+
+
+
+
+
+
 

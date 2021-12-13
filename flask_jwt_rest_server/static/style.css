@@ -1,0 +1,53 @@
+body {
+  background-color: #181818;
+}
+
+#fileDiv
+{
+border: solid white;
+  background-color: lightblue;
+  text-align: center;
+  position:relative;
+  height: 400px;
+  width 300px;
+  top:50%;
+  left:50%;
+  margin-top:-50px; /* this is half the height of your div*/
+  margin-left:-100px; /*this is half of width of your div*/
+}
+
+.center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+#login
+{
+  position:absolute;
+  top:50%;
+  left:50%;
+  margin-top:-50px; /* this is half the height of your div*/
+  margin-left:-100px; /*this is half of width of your div*/
+}
+
+.progress-wrapper {
+    width:100%;
+}
+.progress-wrapper .progress {
+
+    background-color:green;
+    width:0%;
+    padding:5px 0px 5px 0px;
+}
+
+
+label{
+color: white;
+
+}
+
+

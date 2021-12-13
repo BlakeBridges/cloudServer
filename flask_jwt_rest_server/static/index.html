@@ -1,116 +1,119 @@
+
 <!DOCTYPE html>
 <html>
-    <head>
-	     <script src="https://code.jquery.com/jquery-3.6.0.js" 
-		     integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
-	     <script src="/static/cis444.js"></script>
-    </head>
-    <body>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="/static/cis444.js"></script>
+<link rel= "stylesheet" type= "text/css" href= "style.css">
+</head>
+<body>
+    <div id="login">
+        <form>
+            <label for="loginUsername">Username:</label><br>
+            <input type="text" id="loginUsername" name="loginUsername" value="John"><br>
+            <label for="loginPassword">Password:</label><br>
+            <input type="password" id="loginPassword" name="loginPassword" value="12212"><br><br>
+            <input type="submit" value="Login" onclick="return send_login();">
+        </form>
+    </div>
 
-	<script>
-		function send_login(){
-			$.post("/open_api/login", { "username":$('#loginUsername').val(),
-				"password":$('#loginPassword').val()},
-                       		function(data, textStatus) {
-					//this gets called when browser receives response from server
-					console.log(data.token);
-					//Set global JWT
-					jwt = data.token;
-					//make secure call with the jwt
-					get_books();
-				}, "json").fail( function(response) {
-					//this gets called if the server throws an error
-					console.log("error");
-					console.log(response);
-				});
-			return false;
-		}
+    <div id ='fileDiv' display: hidden>
+    <form id='file-catcher'>
+	<div class="progress-wrapper">
+        <div id="progress-bar-file1" class="progress"></div>
+    	</div>
+        <input id='file-input' type='file' multiple />
+        <button type='submit'>
+            Submit
+        </button>
 
-		function send_signup(){
-                        $.post("/open_api/signup", {"username":$('#signupUsername').val(),
-				"password":$('#signupPassword').val()},
-                                function(data, textStatus) {
-                                        //this gets called when browser receives response from server
-                                        console.log(data.token);
-                                        //Set global JWT
-                                        jwt = data.token;
-                                        //make secure call with the jwt
-                                        get_books();
-                                }, "json").fail( function(response) {
-                                        //this gets called if the server throws an error
-                                        console.log("error");
-                                        console.log(response);
-                                });
-                        return false;
-                }	
+    </form>
+   
+
+    <div id='file-list-display'></div>
+    </div>
 
 
-		function get_books(){
-			 //make secure call with the jwt
-                         secure_get_with_token("/secure_api/get_books", function(data){
-				 console.log(data)
-				for( i = 0; i < data.books.length; i++)
-				{
-					book = data.books[i][0];
-					author = data.books[i][1];
-					$('#bookSelection').append(`<option value="book ${i}">${book}</option>`);
-				}
-					
-				 showBooks();
-			 },
-                        function(err){ console.log(err) });
-			}
+    <script>
 
+            (function () {
+            var fileCatcher = document.getElementById('file-catcher');
+            var fileInput = document.getElementById('file-input');
+            var fileListDisplay = document.getElementById('file-list-display');
+            var fileList = [];
+            var renderFileList, sendFile;
 
+            fileCatcher.addEventListener('submit', function (evnt) {
+                evnt.preventDefault();
+                fileList.forEach(function (file) {
+                    sendFile(file);
+                });
+            });
 
-		function showBooks(){	
-			$('#login').hide();
-			$('#signup').hide();
-                 	$('#booksDiv').show();
-                 	$('#purchaseButton').show();
-		}
+            fileInput.addEventListener('change', function (evnt) {
+                fileList = [];
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    fileList.push(fileInput.files[i]);
+                }
+                renderFileList();
+            });
+
+            renderFileList = function () {
+                fileListDisplay.innerHTML = '';
+                fileList.forEach(function (file, index) {
+                    var fileDisplayEl = document.createElement('p');
+                    fileDisplayEl.innerHTML = (index + 1) + ': ' + file.name;
+                    fileListDisplay.appendChild(fileDisplayEl);
+                });
+                };
 		
-		function purchaseBook() {
-			book = $('#bookSelection').find(":selected").text()
-			console.log(book)
-           		secure_post_with_token("/secure_api/purchase",
-				book,
-				function(data){
-					 console.log("Sent Purchase");
-			   		 alert("Book Purchased")
-				},
-                                function(err){ console.log(err) });
-        	}
+                sendFile = function (file) {
+                    var formData = new FormData();
+                    formData.set('file', file);
 
-	</script>
-            <div id="login">
-	    	<form >
-  			<label for="loginUsername">Username:</label><br>
-  				<input type="text" id="loginUsername" name="loginUsername" value="John"><br>
-  			<label for="loginPassword">Password:</label><br>
-  				<input type="password" id="loginPassword" name="loginPassword" value="12212"><br><br>
-  			<input type="submit" value="Login" onclick="return send_login();">
-		</form>
-	    </div>
+                    secure_file_upload("/secure_api/uploadFile",
+                        formData,
+                        function (data) {
+                            console.log(data);
+           
+                        },
+                        function (err) { console.log(err)
+			Alert("Could not save images, try again.")
+			})
+                };
+            })();
 
-	    <div id="signup">
-                <form >
-                        <label for="signupUsername">Username:</label><br>
-                                <input type="text" id="signupUsername" name="signupUsername" value=""><br>
-                        <label for="signupPassword">Password:</label><br>
-                                <input type="password" id="signupPassword" name="signupPassword" value=""><br><br>
-                        <input type="submit" value="Signup" onclick="return send_signup();">
-                </form>
-            </div>
+            function send_login() {
+                $.post("/open_api/login", {
+                    "username": $('#loginUsername').val(),
+                    "password": $('#loginPassword').val()
+                },
+                    function (data, textStatus) {
+                        //this gets called when browser receives response from server
+                        console.log(data.token);
+                        //Set global JWT
+                        jwt = data.token;
+                        //make secure call with the jwt
+                        showUpload();
+                    }, "json").fail(function (response) {
+                        //this gets called if the server throws an error
+			alert("Log in failed, please try again");
+                        console.log("error");
+                        console.log(response);
+                    });
+                return false;
+            }
 
-	   <div id="booksDiv" display: hidden>
-		<select name="bookSelection" id="bookSelection"></select>
-	</div>
+            function showUpload() {
+                $('#login').hide();
+                $('#fileDiv').show();
+            }
 
-	<div id="purchaseButton" display: hidden>
-		<input type="submit" value="Purchase book" onclick="return purchaseBook();">
-	</div>
+    </script>
 
-    </body>
+
+</body>
 </html>
+
 
